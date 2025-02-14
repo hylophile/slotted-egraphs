@@ -65,8 +65,8 @@ impl<L: Language + 'static, N: Analysis<L> + 'static> Rewrite<L, N> {
 
     /// Create a conditional rewrite rule.
     pub fn new_if(rule: &str, a: &str, b: &str, cond: impl Fn(&Subst, &EGraph<L, N>) -> bool + 'static) -> Self {
-        let a = Pattern::parse(a).unwrap();
-        let b = Pattern::parse(b).unwrap();
+        let a = Pattern::parse(a).expect(rule);
+        let b = Pattern::parse(b).expect(rule);
         let rule = rule.to_string();
         let a2 = a.clone();
         RewriteT {
