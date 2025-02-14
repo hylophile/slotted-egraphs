@@ -18,10 +18,12 @@ use std::sync::Arc;
 use std::ops::Deref;
 
 #[doc(hidden)]
-pub type HashMap<K, V> = fnv::FnvHashMap<K, V>;
+// pub type HashMap<K, V> = fnv::FnvHashMap<K, V>;
+pub type HashMap<K, V> = ahash::AHashMap<K, V>;
 
 #[doc(hidden)]
-pub type HashSet<T> = fnv::FnvHashSet<T>;
+// pub type HashSet<T> = fnv::FnvHashSet<T>;
+pub type HashSet<T> = ahash::AHashSet<T>;
 
 pub use symbol_table::GlobalSymbol as Symbol;
 

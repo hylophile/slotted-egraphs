@@ -21,6 +21,7 @@ slotted-egraphs-derive = { path = "slotted-egraphs-derive" }
 fnv = "1.0.7"
 tracing = { version = "0.1", features = ["attributes"], optional = true }
 symbol_table = { version = "0.3", features = ["global"] }
+ahash = "0.8.11"
 
 [dev-dependencies]
 rand = "0.8.5"
