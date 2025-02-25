@@ -19,7 +19,8 @@ features = ["explanations"]
 slotted-egraphs-derive = { path = "slotted-egraphs-derive" }
 tracing = { version = "0.1", features = ["attributes"], optional = true }
 symbol_table = { version = "0.3", features = ["global"] }
-fxhash = "0.2.1"
+rustc-hash = "2.1.1"
+indexmap = "2.7.1"
 
 [dev-dependencies]
 rand = "0.8.5"
