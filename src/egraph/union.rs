@@ -12,8 +12,8 @@ impl<L: Language, N: Analysis<L>> EGraph<L, N> {
         ]
         .into_iter()
         .collect();
-        let a = Pattern::parse("?a").unwrap();
-        let b = Pattern::parse("?b").unwrap();
+        let a = PatternAst::parse("?a").unwrap();
+        let b = PatternAst::parse("?b").unwrap();
 
         self.union_instantiations(&a, &b, &subst, j)
     }
@@ -21,8 +21,8 @@ impl<L: Language, N: Analysis<L>> EGraph<L, N> {
     #[cfg_attr(feature = "trace", instrument(level = "trace", skip_all))]
     pub fn union_instantiations(
         &mut self,
-        from_pat: &Pattern<L>,
-        to_pat: &Pattern<L>,
+        from_pat: &PatternAst<L>,
+        to_pat: &PatternAst<L>,
         subst: &Subst,
         justification: Option<String>,
     ) -> bool {
