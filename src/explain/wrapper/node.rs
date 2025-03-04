@@ -56,11 +56,11 @@ impl<L: Language> ProvenNode<L> {
 }
 
 impl<L: Language, N: Analysis<L>> EGraph<L, N> {
-    pub(crate) fn check_pn(&self, pn: &ProvenNode<L>) {
+    pub(crate) fn check_pn(&self, _pn: &ProvenNode<L>) {
         #[cfg(feature = "explanations")]
         {
-            let a = &pn.proofs;
-            let b = &pn.elem.applied_id_occurrences();
+            let a = &_pn.proofs;
+            let b = &_pn.elem.applied_id_occurrences();
             assert_eq!(a.len(), b.len());
             for (x, y) in a.iter().zip(b.iter()) {
                 assert_eq!(x.r.id, y.id);

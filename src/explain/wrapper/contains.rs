@@ -83,12 +83,12 @@ impl<L: Language, N: Analysis<L>> EGraph<L, N> {
         out
     }
 
-    pub(crate) fn chain_pc_eq(&self, start: &ProvenContains<L>, eq: ProvenEq) -> ProvenContains<L> {
-        ProvenContains {
-            node: start.node.clone(),
-            pai: self.chain_pai_eq(&start.pai, eq),
-        }
-    }
+    // pub(crate) fn chain_pc_eq(&self, start: &ProvenContains<L>, eq: ProvenEq) -> ProvenContains<L> {
+    //     ProvenContains {
+    //         node: start.node.clone(),
+    //         pai: self.chain_pai_eq(&start.pai, eq),
+    //     }
+    // }
 
     // After this fn, both PCs talk about the same e-node.
     // panics, if that's impossible.

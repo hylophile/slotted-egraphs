@@ -9,12 +9,12 @@ pub(crate) struct ProvenAppliedId {
 }
 
 impl<L: Language, N: Analysis<L>> EGraph<L, N> {
-    pub(crate) fn check_pai(&self, pai: &ProvenAppliedId) {
+    pub(crate) fn check_pai(&self, _pai: &ProvenAppliedId) {
         #[cfg(feature = "explanations")]
         {
-            assert_eq!(pai.proof.r.id, pai.elem.id);
-            self.check_syn_applied_id(&pai.proof.l);
-            self.check_syn_applied_id(&pai.proof.r);
+            assert_eq!(_pai.proof.r.id, _pai.elem.id);
+            self.check_syn_applied_id(&_pai.proof.l);
+            self.check_syn_applied_id(&_pai.proof.r);
         }
     }
 
@@ -67,12 +67,12 @@ impl<L: Language, N: Analysis<L>> EGraph<L, N> {
     }
 
     // doesn't do anything if explanations are off.
-    pub(crate) fn chain_pai_eq(&self, pai: &ProvenAppliedId, peq: ProvenEq) -> ProvenAppliedId {
-        ProvenAppliedId {
-            elem: pai.elem.clone(),
+    // pub(crate) fn chain_pai_eq(&self, pai: &ProvenAppliedId, peq: ProvenEq) -> ProvenAppliedId {
+    //     ProvenAppliedId {
+    //         elem: pai.elem.clone(),
 
-            #[cfg(feature = "explanations")]
-            proof: self.prove_transitivity(pai.proof.clone(), peq),
-        }
-    }
+    //         #[cfg(feature = "explanations")]
+    //         proof: self.prove_transitivity(pai.proof.clone(), peq),
+    //     }
+    // }
 }

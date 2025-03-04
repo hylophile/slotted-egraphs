@@ -24,12 +24,14 @@ impl<L: Language, N: Analysis<L>> EGraph<L, N> {
         from_pat: &Pattern<L>,
         to_pat: &Pattern<L>,
         subst: &Subst,
-        justification: Option<String>,
+        _justification: Option<String>,
     ) -> bool {
         let a = pattern_subst(self, from_pat, subst);
         let b = pattern_subst(self, to_pat, subst);
 
+        #[cfg(feature = "explanations")]
         let syn_a = self.synify_app_id(a.clone());
+        #[cfg(feature = "explanations")]
         let syn_b = self.synify_app_id(b.clone());
 
         let proof = ghost!(self.prove_explicit(&syn_a, &syn_b, justification));
@@ -49,7 +51,7 @@ impl<L: Language, N: Analysis<L>> EGraph<L, N> {
         &mut self,
         l: &AppliedId,
         r: &AppliedId,
-        proof: ProvenEq,
+        _proof: ProvenEq,
     ) -> bool {
         // normalize inputs
         let pai_l = self.proven_find_applied_id(&l);
@@ -172,13 +174,13 @@ impl<L: Language, N: Analysis<L>> EGraph<L, N> {
     }
 
     // moves everything from `from` to `to`.
-    fn move_to(&mut self, from: &AppliedId, to: &AppliedId, proof: ProvenEq) {
+    fn move_to(&mut self, from: &AppliedId, to: &AppliedId, _proof: ProvenEq) {
         if CHECKS {
             assert_eq!(from.slots(), to.slots());
             #[cfg(feature = "explanations")]
-            assert_eq!(from.id, proof.l.id);
+            assert_eq!(from.id, _proof.l.id);
             #[cfg(feature = "explanations")]
-            assert_eq!(to.id, proof.r.id);
+            assert_eq!(to.id, _proof.r.id);
         }
 
         {
@@ -206,14 +208,14 @@ impl<L: Language, N: Analysis<L>> EGraph<L, N> {
             elem: app_id,
 
             #[cfg(feature = "explanations")]
-            proof,
+            proof: _proof,
         };
         self.unionfind_set(from.id, pai);
 
         // who updates the usages? raw_add_to_class & raw_remove_from_class do that.
 
         let from_nodes = self.classes.get(&from.id).unwrap().nodes.clone();
-        let from_id = self.mk_sem_identity_applied_id(from.id);
+        // let from_id = self.mk_sem_identity_applied_id(from.id);
         for (sh, psn) in from_nodes {
             self.raw_remove_from_class(from.id, sh.clone());
             // if `sh` contains redundant slots, these won't be covered by 'map'.

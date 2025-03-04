@@ -105,29 +105,31 @@ impl Permutation for ProvenPerm {
 
 impl ProvenPerm {
     pub(crate) fn identity(
-        i: Id,
+        _i: Id,
         slots: &HashSet<Slot>,
-        syn_slots: &HashSet<Slot>,
-        reg: ProofRegistry,
+        _syn_slots: &HashSet<Slot>,
+        _reg: ProofRegistry,
     ) -> Self {
         let map = Perm::identity(slots);
 
-        let identity = SlotMap::identity(syn_slots);
-        let app_id = AppliedId::new(i, identity);
         #[cfg(feature = "explanations")]
-        let prf = prove_reflexivity(&app_id, &reg);
+        let identity = SlotMap::identity(_syn_slots);
+        #[cfg(feature = "explanations")]
+        let app_id = AppliedId::new(_i, identity);
+        #[cfg(feature = "explanations")]
+        let prf = prove_reflexivity(&app_id, &_reg);
         ProvenPerm {
             elem: map,
             #[cfg(feature = "explanations")]
             proof: prf,
             #[cfg(feature = "explanations")]
-            reg,
+            reg: _reg,
         }
     }
 
-    fn to_string(&self) -> String {
-        format!("{:?}", (&self.elem, ghost!(&**self.proof)))
-    }
+    // fn to_string(&self) -> String {
+    //     format!("{:?}", (&self.elem, ghost!(&**self.proof)))
+    // }
 
     pub(crate) fn check(&self) {
         assert!(self.elem.is_perm());
