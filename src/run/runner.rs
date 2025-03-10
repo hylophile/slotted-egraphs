@@ -78,8 +78,8 @@ where
 
 impl<L, N, IterData> Runner<L, N, IterData>
 where
-    L: Language,
-    N: Analysis<L>,
+    L: Language + Send + Sync,
+    N: Analysis<L> + Send + Sync,
     IterData: IterationData<L, N>,
 {
     pub fn new() -> Self {

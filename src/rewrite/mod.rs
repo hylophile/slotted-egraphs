@@ -12,7 +12,7 @@ pub use subst_method::*;
 
 /// An equational rewrite rule.
 pub struct Rewrite<L: Language, N: Analysis<L> = ()> {
-    pub(crate) searcher: Box<dyn Fn(&EGraph<L, N>) -> Box<dyn Any>>,
+    pub(crate) searcher: Arc<Box<dyn Fn(&EGraph<L, N>) -> Arc<dyn Any>>>,
     pub(crate) applier: Box<dyn Fn(Box<dyn Any>, &mut EGraph<L, N>)>,
 }
 
@@ -32,7 +32,7 @@ impl<L: Language + 'static, N: Analysis<L> + 'static, T: 'static> RewriteT<L, N,
         let searcher = self.searcher;
         let applier = self.applier;
         Rewrite {
-            searcher: Box::new(move |eg| Box::new((*searcher)(eg))),
+            searcher: Arc::new(Box::new(move |eg| Arc::new((*searcher)(eg)))),
             applier: Box::new(move |t, eg| (*applier)(any_to_t(t), eg)),
         }
     }
@@ -44,16 +44,51 @@ fn any_to_t<T: Any>(t: Box<dyn Any>) -> T {
 
 /// Applies each given rewrite rule to the E-Graph once.
 /// Returns an indicator for whether the e-graph changed as a result.
-#[cfg_attr(feature = "trace", instrument(level = "trace", skip_all))]
-pub fn apply_rewrites<L: Language, N: Analysis<L>>(
-    eg: &mut EGraph<L, N>,
-    rewrites: &[Rewrite<L, N>],
-) -> bool {
+// #[cfg_attr(feature = "trace", instrument(level = "trace", skip_all))]
+// pub fn apply_rewrites<L: Language, N: Analysis<L>>(
+//     eg: &mut EGraph<L, N>,
+//     rewrites: &[Rewrite<L, N>],
+// ) -> bool {
+//     let prog = eg.progress();
+
+//     let ts: Vec<Box<dyn Any>> = rewrites.iter().map(|rw| (*rw.searcher)(eg)).collect();
+//     for (rw, t) in rewrites.iter().zip(ts.into_iter()) {
+//         (*rw.applier)(t, eg);
+//     }
+
+//     prog != eg.progress()
+// }
+use std::sync::{mpsc, Arc};
+use std::thread;
+
+pub fn apply_rewrites<L, N>(eg: &mut EGraph<L, N>, rewrites: &[Rewrite<L, N>]) -> bool
+where
+    L: Language + Send + Sync,
+    N: Analysis<L> + Send + Sync, // Ensure N is thread-safe
+{
     let prog = eg.progress();
 
-    let ts: Vec<Box<dyn Any>> = rewrites.iter().map(|rw| (*rw.searcher)(eg)).collect();
-    for (rw, t) in rewrites.iter().zip(ts.into_iter()) {
-        (*rw.applier)(t, eg);
+    let (tx, rx) = mpsc::channel();
+    let eg_ref = Arc::new(eg); // Arc for safe shared access
+
+    for rw in rewrites.iter() {
+        let eg_clone = Arc::clone(&eg_ref);
+        let tx = tx.clone();
+        let rw_searcher = Arc::clone(&rw.searcher); // Ensure searcher is thread-safe
+
+        thread::spawn(move || {
+            let result = rw_searcher(&eg_clone);
+            let _ = tx.send((rw, result));
+        });
+    }
+
+    drop(tx); // Drop sender to close the channel after sending
+
+    let ts: Vec<_> = rx.into_iter().collect(); // Collect results
+
+    // Apply rewrites sequentially
+    for (rw, t) in ts {
+        (rw.applier)(Box::new(t), eg);
     }
 
     prog != eg.progress()
